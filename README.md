@@ -25,7 +25,7 @@ Nevertheless, the code should work on other configurations as well. Since the re
 ###  Clone the Repository
 
 ```bash
-git clone https://anonymous.4open.science/r/DICL-DCBF.git
+git clone https://github.com/syma-afsha/DICL
 cd DICL
 ```
 
