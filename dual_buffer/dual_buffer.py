@@ -474,55 +474,55 @@ class DualBuffer:
 # #         elif self.xi_mode == 'prioritized':
 # #             batch_priorities = np.abs(priorities)
 
-# #             # **1️⃣ Compute Mean Priorities for Each Buffer**
+# #             # **1️ Compute Mean Priorities for Each Buffer**
 # #             prio_primary = np.mean(batch_priorities[:self.primary_batch_size]) if self.primary_batch_size > 0 else 0.0
 # #             prio_pos = np.mean(batch_priorities[self.primary_batch_size:self.primary_batch_size + self.pos_batch_size]) if self.pos_batch_size > 0 else 0.0
 # #             prio_neg = np.mean(batch_priorities[self.primary_batch_size + self.pos_batch_size:]) if self.neg_batch_size > 0 else 0.0
 
-# #             # **2️⃣ Compute Weighted Priorities**
+# #             # **2️ Compute Weighted Priorities**
 # #             weighted_primary = prio_primary ** self.xi_prioritized_alpha
 # #             weighted_pos = prio_pos ** self.xi_prioritized_alpha
 # #             weighted_neg = prio_neg ** self.xi_prioritized_alpha
 
 # #             total_priority = weighted_primary + weighted_pos + weighted_neg + 1e-8  # Avoid division by zero
 
-# #             # **3️⃣ Compute Base Probabilities**
+# #             # **3️ Compute Base Probabilities**
 # #             prob_primary = np.clip(weighted_primary / total_priority, self.xi_min, self.xi_max)
             
-# #             # **4️⃣ Apply Logarithmic Scaling for `prob_pos` (Smooth Increase)**
+# #             # **4️ Apply Logarithmic Scaling for `prob_pos` (Smooth Increase)**
 # #             log_factor = np.log1p(success_rate) / np.log1p(1)  # Normalized log scaling
 # #             prob_pos = self.xi_min + (self.xi_max - self.xi_min) * log_factor  # Log interpolation
 
-# #             # **5️⃣ Apply Exponential Decay for `prob_neg` (Smooth Reduction)**
+# #             # **5️ Apply Exponential Decay for `prob_neg` (Smooth Reduction)**
 # #             prob_neg = np.exp(-self.log_scale * success_rate)  # Exponential decay to remove negative samples
 # #             prob_neg = max(0.0, prob_neg)  # Ensure `prob_neg` never goes negative
 
-# #             # **6️⃣ Prevent Difficulty Reduction (Self-Paced Locking)**
+# #             # **6️ Prevent Difficulty Reduction (Self-Paced Locking)**
 # #             self.max_achieved_prob = max(self.max_achieved_prob, prob_pos)  # Track max difficulty
 # #             prob_pos = max(self.max_achieved_prob * 0.98, prob_pos)  # Prevent difficulty reduction
 # #             prob_neg = max(0.0, prob_neg)  # Ensure negative probability fully reduces when success is high
 
-# #             # **7️⃣ Normalize Probabilities**
+# #             # **7️ Normalize Probabilities**
 # #             prob_primary = max(0.15, 1 - (prob_pos + prob_neg))  # Ensure primary buffer is maintained
 # #             total_prob = prob_primary + prob_pos + prob_neg
 # #             prob_primary /= total_prob
 # #             prob_pos /= total_prob
 # #             prob_neg /= total_prob
 
-# #             # **8️⃣ Update Sampling Ratios**
+# #             # **8️ Update Sampling Ratios**
 # #             self.xi_primary_ratio = prob_primary
 # #             self.xi_pos = prob_pos
 # #             self.xi_neg = prob_neg
 
-# #             # **9️⃣ Recalculate Batch Sizes**
+# #             # **9️ Recalculate Batch Sizes**
 # #             self.pos_batch_size = int(self.batch_size * self.xi_pos)
 # #             self.neg_batch_size = int(self.batch_size * self.xi_neg)
 # #             self.primary_batch_size = max(1, self.batch_size - self.pos_batch_size - self.neg_batch_size)
 
-# #             # **🔟 Debugging Output**
-# #             print(f"📊 Self-Paced Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
-# #             print(f"🔄 Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
-# #             print(f"✅ Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
+# #             # **10 Debugging Output**
+# #             print(f"Self-Paced Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
+# #             print(f" Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
+# #             print(f"Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
 
 
 
@@ -546,137 +546,136 @@ class DualBuffer:
 #     #         return
 
 #     #     elif self.xi_mode == 'prioritized':
-#     #         # **1️⃣ Update Success Rate with Weighted Moving Average**
+#     #         # **1️ Update Success Rate with Weighted Moving Average**
 #     #         beta = 0.9  # Smoothing factor
 #     #         self.success_rate_wma = beta * self.success_rate_wma + (1 - beta) * success_rate  # Smoothed success rate
 
 #     #         batch_priorities = np.abs(priorities)
 
-#     #         # **2️⃣ Compute Mean Priorities for Each Buffer**
+#     #         # **2️ Compute Mean Priorities for Each Buffer**
 #     #         prio_primary = np.mean(batch_priorities[:self.primary_batch_size]) if self.primary_batch_size > 0 else 0.0
 #     #         prio_pos = np.mean(batch_priorities[self.primary_batch_size:self.primary_batch_size + self.pos_batch_size]) if self.pos_batch_size > 0 else 0.0
 #     #         prio_neg = np.mean(batch_priorities[self.primary_batch_size + self.pos_batch_size:]) if self.neg_batch_size > 0 else 0.0
 
-#     #         # **3️⃣ Compute Weighted Priorities**
+#     #         # **3️ Compute Weighted Priorities**
 #     #         weighted_primary = prio_primary ** self.xi_prioritized_alpha
 #     #         weighted_pos = prio_pos ** self.xi_prioritized_alpha
 #     #         weighted_neg = prio_neg ** self.xi_prioritized_alpha
 
 #     #         total_priority = weighted_primary + weighted_pos + weighted_neg + 1e-8  # Avoid division by zero
 
-#     #         # **4️⃣ Compute Base Probabilities**
+#     #         # **4️ Compute Base Probabilities**
 #     #         prob_primary = np.clip(weighted_primary / total_priority, self.xi_min, self.xi_max)
 #     #         prob_pos = np.clip(weighted_pos / total_priority, self.xi_min, self.xi_max)
 #     #         prob_neg = np.clip(weighted_neg / total_priority, self.xi_min, self.xi_max)
 
-#     #         # **5️⃣ Apply Sigmoid-Based Probability Transition for `prob_pos`**
+#     #         # **5️ Apply Sigmoid-Based Probability Transition for `prob_pos`**
 #     #         adaptive_success = max(self.success_rate_wma, self.base_success_rate)  # Ensure base stability
 #     #         prob_pos = self.xi_min + (self.xi_max - self.xi_min) * (1 / (1 + np.exp(-self.sigmoid_scale * (adaptive_success - self.sigmoid_shift))))
 
-#     #         # **6️⃣ Apply Logarithmic Scaling for `prob_neg`**
+#     #         # **6️ Apply Logarithmic Scaling for `prob_neg`**
 #     #         prob_neg = np.exp(-self.log_scale * prob_pos)  # Log-decay instead of hard clipping
 #     #         prob_neg = prob_neg / (prob_neg + prob_pos + 1e-8)  # Normalize
 
-#     #         # **7️⃣ Prevent Difficulty Reduction (Self-Paced Locking)**
+#     #         # **7️ Prevent Difficulty Reduction (Self-Paced Locking)**
 #     #         self.max_achieved_prob = max(self.max_achieved_prob, prob_pos)  # Track max difficulty
 #     #         prob_pos = max(self.max_achieved_prob * 0.98, prob_pos)  # Prevent difficulty reduction
 #     #         prob_neg = max(0.1, prob_neg)  # Ensure some negative exploration
-
-#     #         # **8️⃣ Normalize Probabilities**
+#     #         # **8️ Normalize Probabilities**
 #     #         prob_primary = max(0.15, 1 - (prob_pos + prob_neg))  # Ensure primary buffer is maintained
 #     #         total_prob = prob_primary + prob_pos + prob_neg
 #     #         prob_primary /= total_prob
 #     #         prob_pos /= total_prob
 #     #         prob_neg /= total_prob
 
-#     #         # **9️⃣ Update Sampling Ratios**
+#     #         # **9️Update Sampling Ratios**
 #     #         self.xi_primary_ratio = prob_primary
 #     #         self.xi_pos = prob_pos
 #     #         self.xi_neg = prob_neg
 
-#     #         # **🔟 Recalculate Batch Sizes**
+#     #         # **10 Recalculate Batch Sizes**
 #     #         self.pos_batch_size = int(self.batch_size * self.xi_pos)
 #     #         self.neg_batch_size = int(self.batch_size * self.xi_neg)
 #     #         self.primary_batch_size = max(1, self.batch_size - self.pos_batch_size - self.neg_batch_size)
 
 #     #         # **Debugging Output**
-#     #         print(f"📊 Log-Based Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
-#     #         print(f"🔄 Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
-#     #         print(f"✅ Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
+#     #         print(f" Log-Based Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
+#     #         print(f" Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
+#     #         print(f" Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
 
 
         
 #     # def update_priorities(self, priorities: np.ndarray, success_rate: float) -> None:
 #     #     """ Hybrid Adaptive Prioritization: Fully Adaptive → Self-Paced Transition. """
 
-#     #     # **1️⃣ Update Success Rate with Weighted Moving Average (Smooth Transitions)**
+#     #     # **1️1 Update Success Rate with Weighted Moving Average (Smooth Transitions)**
 #     #     beta = 0.9  # Smoothing factor for gradual adaptation
 #     #     self.success_rate_wma = beta * self.success_rate_wma + (1 - beta) * success_rate  # Smoothed success rate
 
-#     #     # **2️⃣ Compute Base Priorities**
+#     #     # **2️ Compute Base Priorities**
 #     #     batch_priorities = np.abs(priorities)
 #     #     weighted_priority = batch_priorities ** 0.5  # xi_prioritized_alpha
 #     #     total_priority = np.sum(weighted_priority) + 1e-8  # Avoid division by zero
 #     #     prob_base = weighted_priority / total_priority  # Normalize
 #     #     self.prob_positive=0.0
 
-#     #     # **3️⃣ Fully Adaptive Phase (Exploration)**
+#     #     # **3️ Fully Adaptive Phase (Exploration)**
 #     #     if self.success_rate_wma < 0.8:  # Allow difficulty to change in both directions
 #     #         prob_pos = self.xi_min + (self.xi_max - self.xi_min) * (1 / (1 + np.exp(-self.sigmoid_scale * (self.success_rate_wma - self.sigmoid_shift))))
 #     #         prob_neg = 1 - prob_pos  # Ensure total sum = 1
 #     #         self.max_achieved_prob = max(self.max_achieved_prob, prob_pos)  # Track highest difficulty
 #     #         self.prob_positive=prob_pos
 
-#     #     # **4️⃣ Self-Paced Phase (Mastery)**
+#     #     # **4️ Self-Paced Phase (Mastery)**
 #     #     else:  
 
 #     #         prob_pos = max(self.max_achieved_prob, self.prob_positive)  # Never decrease difficulty
 #     #         prob_neg = 1 - prob_pos  # Adjust neg accordingly
 
-#     #     # **5️⃣ Normalize Probabilities**
+#     #     # **5️ Normalize Probabilities**
 #     #     prob_primary = max(0.1, 1 - (prob_pos + prob_neg))  # Ensure primary isn't zero
 #     #     total_prob = prob_primary + prob_pos + prob_neg
 #     #     prob_primary /= total_prob
 #     #     prob_pos /= total_prob
 #     #     prob_neg /= total_prob
 
-#     #     # **6️⃣ Update Sampling Ratios**
+#     #     # **6️ Update Sampling Ratios**
 #     #     self.xi_primary_ratio = prob_primary
 #     #     self.xi_pos = prob_pos
 #     #     self.xi_neg = prob_neg
 
-#     #     # **7️⃣ Recalculate Batch Sizes**
+#     #     # **7️ Recalculate Batch Sizes**
 #     #     self.pos_batch_size = int(self.batch_size * self.xi_pos)
 #     #     self.neg_batch_size = int(self.batch_size * self.xi_neg)
 #     #     self.primary_batch_size = max(1, self.batch_size - self.pos_batch_size - self.neg_batch_size)
 
-#     #     # **8️⃣ Debugging Output**
-#     #     print(f"📊 Hybrid Adaptive Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
-#     #     print(f"🔄 Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
-#     #     print(f"✅ Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
+#     #     # **8️ Debugging Output**
+#     #     print(f"Hybrid Adaptive Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
+#     #     print(f"Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
+#     #     print(f"Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
 #     # def update_priorities(self, priorities: np.ndarray, success_rate: float) -> None:
 #     #     """ Self-Paced Adaptive Prioritization with Difficulty Locking & Exploration Control. """
         
-#     #     # **1️⃣ Update Success Rate with Weighted Moving Average**
+#     #     # **1️Update Success Rate with Weighted Moving Average**
 #     #     beta = 0.9  # Smoothing factor
 #     #     self.success_rate_wma = beta * self.success_rate_wma + (1 - beta) * success_rate
 
-#     #     # **2️⃣ Compute Base Priorities**
+#     #     # **2️ Compute Base Priorities**
 #     #     batch_priorities = np.abs(priorities)
 #     #     weighted_priority = batch_priorities ** 0.5  # Adaptive scaling factor
 #     #     total_priority = np.sum(weighted_priority) + 1e-8  # Avoid division by zero
 #     #     prob_base = weighted_priority / total_priority
 
-#     #     # **3️⃣ Apply Self-Paced Sigmoid Transition**
+#     #     # **3️ Apply Self-Paced Sigmoid Transition**
 #     #     adaptive_success = max(self.success_rate_wma, self.base_success_rate)  # Ensure base stability
 #     #     prob_pos = self.xi_min + (self.xi_max - self.xi_min) * (1 / (1 + np.exp(-self.sigmoid_scale * (adaptive_success - self.sigmoid_shift))))
         
-#     #     # **4️⃣ Prevent Difficulty Reduction (Self-Paced Locking)**
+#     #     # **4️ Prevent Difficulty Reduction (Self-Paced Locking)**
 #     #     self.max_achieved_prob = max(self.max_achieved_prob, prob_pos)  # Keep track of max difficulty
 #     #     prob_pos = max(self.max_achieved_prob * 0.98, prob_pos)  # Prevent reduction
 #     #     prob_neg = max(0.1, 1 - prob_pos)  # Keep exploration at least 10%
 
-#     #     # **5️⃣ Stage-Based Adaptation for Smooth Transitions**
+#     #     # **5️ Stage-Based Adaptation for Smooth Transitions**
 #     #     if self.success_rate_wma < 0.3:  # Early learning phase → increase exploration
 #     #         prob_pos = max(0.3, prob_pos - 0.05)
 #     #         prob_neg = min(0.4, prob_neg + 0.05)  # Ensure failures are explored
@@ -685,74 +684,74 @@ class DualBuffer:
 #     #         prob_pos = min(0.85, prob_pos + 0.05)
 #     #         prob_neg = max(0.05, 1 - prob_pos)
 
-#     #     # **6️⃣ Normalize Probabilities**
+#     #     # **6️Normalize Probabilities**
 #     #     prob_primary = max(0.15, 1 - (prob_pos + prob_neg))  # Ensure primary buffer is maintained
 #     #     total_prob = prob_primary + prob_pos + prob_neg
 #     #     prob_primary /= total_prob
 #     #     prob_pos /= total_prob
 #     #     prob_neg /= total_prob
 
-#     #     # **7️⃣ Update Sampling Ratios**
+#     #     # **7️ Update Sampling Ratios**
 #     #     self.xi_primary_ratio = prob_primary
 #     #     self.xi_pos = prob_pos
 #     #     self.xi_neg = prob_neg
 
-#     #     # **8️⃣ Recalculate Batch Sizes**
+#     #     # **8️Recalculate Batch Sizes**
 #     #     self.pos_batch_size = int(self.batch_size * self.xi_pos)
 #     #     self.neg_batch_size = int(self.batch_size * self.xi_neg)
 #     #     self.primary_batch_size = max(1, self.batch_size - self.pos_batch_size - self.neg_batch_size)
 
-#     #     # **9️⃣ Debugging Output**
-#     #     print(f"📊 Self-Paced Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
-#     #     print(f"🔄 Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
-#     #     print(f"✅ Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
+#     #     # **9️ Debugging Output**
+#     #     print(f"Self-Paced Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
+#     #     print(f"Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
+#     #     print(f"Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
 
 
 #     # def update_priorities(self, priorities: np.ndarray, success_rate: float) -> None:
 #     #     """ Self-Paced Adaptive Prioritization using a Base Level & Sigmoid-Based Transition. """
         
-#     #     # **1️⃣ Update Success Rate with Weighted Moving Average**
+#     #     # **1️Update Success Rate with Weighted Moving Average**
 #     #     beta = 0.9  # Smoothing factor
 #     #     self.success_rate_wma = beta * self.success_rate_wma + (1 - beta) * success_rate
 
-#     #     # **2️⃣ Compute Base Priorities**
+#     #     # **2️Compute Base Priorities**
 #     #     batch_priorities = np.abs(priorities)
 #     #     weighted_priority = batch_priorities ** 0.5  # xi_prioritized_alpha
 #     #     total_priority = np.sum(weighted_priority) + 1e-8  # Avoid div by zero
 #     #     prob_base = weighted_priority / total_priority
 
-#     #     # **3️⃣ Apply Self-Paced Sigmoid Transition**
+#     #     # **3️Apply Self-Paced Sigmoid Transition**
 #     #     adaptive_success = self.success_rate_wma 
 
 #     #     prob_pos = self.xi_min + (self.xi_max - self.xi_min) * (1 / (1 + np.exp(-self.sigmoid_scale * (adaptive_success - self.sigmoid_shift))))
 #     #     prob_neg = 1 - prob_pos  # Ensure sum = 1
 
-#     #     # # **4️⃣ Prevent Difficulty Reduction (Self-Paced Mechanism)**
+#     #     # # **4️Prevent Difficulty Reduction (Self-Paced Mechanism)**
 #     #     # self.max_achieved_prob = max(self.max_achieved_prob, prob_pos)  # Keep track of max difficulty
 #     #     # prob_pos = max(self.max_achieved_prob, prob_pos)  # Prevent reduction
 #     #     # prob_neg = 1 - prob_pos  # Adjust neg accordingly
 
-#     #     # **5️⃣ Normalize Probabilities**
+#     #     # **5 Normalize Probabilities**
 #     #     prob_primary = max(0.15, 1 - (prob_pos + prob_neg))  # Ensure primary is not 0
 #     #     total_prob = prob_primary + prob_pos + prob_neg
 #     #     prob_primary /= total_prob
 #     #     prob_pos /= total_prob
 #     #     prob_neg /= total_prob
 
-#     #     # **6️⃣ Update Sampling Ratios**
+#     #     # **6️Update Sampling Ratios**
 #     #     self.xi_primary_ratio = prob_primary
 #     #     self.xi_pos = prob_pos
 #     #     self.xi_neg = prob_neg
 
-#     #     # **7️⃣ Recalculate Batch Sizes**
+#     #     # **7️Recalculate Batch Sizes**
 #     #     self.pos_batch_size = int(self.batch_size * self.xi_pos)
 #     #     self.neg_batch_size = int(self.batch_size * self.xi_neg)
 #     #     self.primary_batch_size = max(1, self.batch_size - self.pos_batch_size - self.neg_batch_size)
 
-#     #     # **8️⃣ Debugging Output**
-#     #     print(f"📊 Self-Paced Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
-#     #     print(f"🔄 Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
-#     #     print(f"✅ Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
+#     #     # **8️Debugging Output**
+#     #     print(f"Self-Paced Prioritization → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
+#     #     print(f"Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
+#     #     print(f" Smoothed Success Rate: {self.success_rate_wma:.3f} | Max Achieved Pos Prob: {self.max_achieved_prob:.2f}")
 
 
 
@@ -816,8 +815,8 @@ class DualBuffer:
 #     #         self.neg_batch_size = int(self.batch_size * self.xi_neg)
 #     #         self.primary_batch_size = max(1, self.batch_size - self.pos_batch_size - self.neg_batch_size)  # Ensure nonzero batch
 
-#     #         print(f"📊 Updated Ratios → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
-#     #         print(f"🔄 Updated Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
+#     #         print(f"Updated Ratios → Primary: {self.xi_primary_ratio:.2f}, Pos: {self.xi_pos:.2f}, Neg: {self.xi_neg:.2f}")
+#     #         print(f"Updated Batch Sizes → Primary: {self.primary_batch_size}, Pos: {self.pos_batch_size}, Neg: {self.neg_batch_size}")
 
 
 #     #         print(f"Success Rate: {success_rate:.2f} | Buffer Ratios -> Primary: {prob_primary:.2f}, Pos: {prob_pos:.2f}, Neg: {prob_neg:.2f}")
