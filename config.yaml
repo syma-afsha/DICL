@@ -1,0 +1,131 @@
+# General settings
+general:
+  seed: random
+  exp_name: "new_experiment"  # Experiment name
+  current_dir: ""
+  logdir: "logs/"
+  save_model: True
+  
+increment:
+  profile: "log"   
+# Environment settings
+environment:
+  name: "FetchPickAndPlace-v4" # RL environment (e.g., FetchPush-v4, FetchPickAndPlace-v4, FetchSlide-v4)
+  action_dim: auto 
+  full_obs_dim: auto
+  observation_dim : auto
+  reward_type: "sparse"  # Sparse reward
+  mode: "rgb_array"
+
+
+hardware:
+  gpu: [0,1,2,3]
+  cpu_min: [0,0,1,1]
+  cpu_max: [16,16,16,16]
+
+# SAC Agent settings
+agent:
+  gamma: 0.95  # Discount factor
+  learning_rate: 0.001  # Learning rate for the optimizer
+  polyak: 0.995  # Polyak averaging for target networks
+  hidden_sizes: [256, 256, 256]  # Neural network architecture
+  boundary_min: -1.0  # Action space lower bound
+  boundary_max: 1.0  # Action space upper bound
+  sac:
+    alpha: 0.1  # Entropy regularization coefficient
+
+# # Training settings
+trainer:
+  total_timesteps: 500000  # Total training timesteps
+  batch_size: 256  # Batch size for training
+  update_after: 1000  # Start updating the model after this many timesteps
+  update_interval: 50  # Update the model every X timesteps (increased for stability)
+  eval_freq: 500  # Evaluate the agent every X timesteps
+  save_freq: 5000  # Save the model every X steps (aligned with training steps)
+  num_test_episodes: 100  # Number of episodes to evaluate the agent
+  log_frequency: 500  # Log metrics every 500 steps
+
+# Replay Buffer settings
+buffer:
+  replay_buffer:
+    size: 1000000  # Maximum number of experiences stored in the buffer
+  
+  
+  use_per: True # Use Prioritized Experience Replay (PER)
+  per:
+    alpha: 0.6  # Controls how much prioritization is used (0 = uniform, 1 = fully prioritized)
+    beta_start: 0.4  # Initial value of importance sampling correction factor
+
+  her:
+    active: True # Use Hindsight Experience Replay (HER)
+    goal_selection_strategy: "future"  # "future" works better for FetchPush (instead of "final")
+    number_of_goal_transitions: 4 # Number of goal transitions per episode
+    state_check: True  # Whether to check if the goal is achieved in the final state
+  dual_buffer:
+    active: False
+    predefined:
+      lambda_pos: 0.0
+      lambda_neg: 0.0
+      profile: "exp" # linear / exponential
+
+    adaptive:
+      lambda_value: -50
+      pos_batch_size: 128
+      neg_batch_size: 128
+      lambda_pos_max: -10
+      lambda_pos_min: -30
+      lambda_neg_max: -50
+      lambda_neg_min: -500
+    
+    xi:
+      mode: fix #("fix" / "fullyAdaptive" / "hybridAdaptive")
+      pos_ratio: 0.33
+      neg_ratio: 0.33
+  
+
+
+  dicl:
+    success_cond: False
+    include_test: True
+    include_train: True
+    lambda:
+      predefined:
+        "lambda_pos_start": -45.0
+        "lambda_pos_end": -10.0
+
+        "lambda_neg_start": -100.0
+        "lambda_neg_end": -100.0
+
+# Exploration settings
+exploration:
+  start_steps: 1000  # Take random actions for the first N steps (increased for stability)
+  max_episode_length: 50  # Maximum steps per episode
+# Logging settings
+logger:
+  model:
+    save: # Save the model
+      mode: all # Save the policy network
+      best_start_t : 0.0 # Start saving the model after this many timesteps
+      freq: 20 # Save the model every X timesteps
+      measure : reward # Measure to use for saving the model
+  rollout:
+    stats_window_size: 10
+
+curriculum:
+    type: "fullyadaptive"
+    success_rate: 0.0
+    c: 0.0
+    range_factor: 0.0
+    time_step: 0.0
+    evaluation:
+      success_rate: 0.0
+evaluation:
+    
+    num_episodes: 100
+    max_episode_steps: 50
+
+
+
+
+
+
